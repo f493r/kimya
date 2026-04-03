@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Atomik Alarm</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="prelaunch">
+    <div class="alarm-flash"></div>
+    <div class="heat-bloom" aria-hidden="true">
+      <span class="heat-wave heat-wave-a"></span>
+      <span class="heat-wave heat-wave-b"></span>
+      <span class="heat-wave heat-wave-c"></span>
+    </div>
+
+    <div class="app-shell">
+      <header class="hud">
+        <div class="hud-brand">
+          <p class="eyebrow">ATOMIK ALARM // REAKTÖR YÖNETİM ARAYÜZÜ</p>
+          <h1>Atomik Alarm</h1>
+          <p class="hud-subtitle">modern atom teorisi tabanlı kriz denetimi</p>
+        </div>
+
+        <div class="hud-stats">
+          <article class="hud-card">
+            <span>Süre</span>
+            <strong id="timeValue">210</strong>
+          </article>
+          <article class="hud-card">
+            <span>Stabilite</span>
+            <strong id="stabilityValue">100%</strong>
+          </article>
+          <article class="hud-card">
+            <span>Sıcaklık</span>
+            <strong id="heatValue">297 K</strong>
+          </article>
+          <article class="hud-card">
+            <span>Kriz</span>
+            <strong id="crisisValue">0 / 0</strong>
+          </article>
+          <article class="hud-card">
+            <span>Çalışma</span>
+            <strong id="seedValue">----</strong>
+          </article>
+        </div>
+      </header>
+
+      <section class="stability-strip">
+        <div id="stabilityFill" class="stability-fill"></div>
+      </section>
+
+      <main class="workspace">
+        <section class="reactor-panel">
+          <div class="panel-topline">
+            <div>
+              <span class="panel-tag">ANA KONTROL EKRANI</span>
+              <h2 id="crisisTitle">Sistem beklemede</h2>
+            </div>
+            <div id="alarmBadge" class="alarm-badge">Beklemede</div>
+          </div>
+
+          <p id="crisisText" class="crisis-text">
+            Simülasyon başlatılmadı. Reaktör kararsızlık paketleri yüklenmeyi bekliyor.
+          </p>
+
+          <div id="taskNoticeBox" class="task-notice hidden">
+            <strong id="taskNoticeTitle">Görev uyarısı</strong>
+            <p id="taskNoticeText"></p>
+          </div>
+
+          <section class="evidence-section">
+            <div class="section-header">
+              <span class="section-label">Canlı Veri</span>
+              <span class="section-meta">ham veri, doğrulanmamış</span>
+            </div>
+            <div id="evidenceBoard" class="evidence-board"></div>
+          </section>
+
+          <section class="terminal-section">
+            <div class="section-header">
+              <span class="section-label">Çözüm Terminali</span>
+              <span id="interactionType" class="section-meta">müdahale bekleniyor</span>
+            </div>
+
+            <div id="terminalFeed" class="terminal-feed"></div>
+
+            <div id="commandArea" class="command-area">
+              <label class="terminal-input-wrap" for="commandInput">
+                <span class="prompt-label">core@reactor:~$</span>
+                <input
+                  id="commandInput"
+                  type="text"
+                  autocomplete="off"
+                  spellcheck="false"
+                  placeholder="komut gir"
+                />
+              </label>
+              <button id="commandSubmit" class="primary-button">Yürüt</button>
+            </div>
+
+            <div id="actionArea" class="action-area hidden"></div>
+
+            <div id="sequenceArea" class="sequence-area hidden">
+              <div class="sequence-current">
+                <span class="section-label">Seçilen Sıra</span>
+                <div id="sequenceCurrent" class="sequence-current-list"></div>
+              </div>
+              <div>
+                <span class="section-label">Parça Bankası</span>
+                <div id="sequenceBank" class="sequence-bank"></div>
+              </div>
+              <div class="sequence-buttons">
+                <button id="sequenceReset" class="secondary-button">Sıfırla</button>
+                <button id="sequenceSubmit" class="primary-button">Diziyi Onayla</button>
+              </div>
+            </div>
+
+            <div id="classifyArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Durum İşaretleme</span>
+                <div id="classifyList" class="classify-list"></div>
+              </div>
+              <div class="sequence-buttons">
+                <button id="classifyReset" class="secondary-button">Sıfırla</button>
+                <button id="classifySubmit" class="primary-button">İşaretleri Onayla</button>
+              </div>
+            </div>
+
+            <div id="threatArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Tehdit Kolu</span>
+                <p id="threatReadout" class="section-meta">Seçim bekleniyor</p>
+              </div>
+              <div id="threatChoices" class="threat-grid">
+                <button class="threat-button" data-level="stabil">Stabil</button>
+                <button class="threat-button" data-level="izle">İzle</button>
+                <button class="threat-button" data-level="mudahale">Müdahale Et</button>
+                <button class="threat-button" data-level="kritik">Kritik</button>
+              </div>
+              <div class="sequence-buttons">
+                <button id="threatSubmit" class="primary-button">Seviyeyi Onayla</button>
+              </div>
+            </div>
+
+            <div id="boxArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Orbital Kutu Modülü</span>
+                <p id="boxReadout" class="section-meta">Her kutu için ∅, ↑ ya da ↑↓ durumunu seç.</p>
+              </div>
+              <div id="boxGrid" class="box-grid"></div>
+              <div class="sequence-buttons">
+                <button id="boxReset" class="secondary-button">Sıfırla</button>
+                <button id="boxSubmit" class="primary-button">Yerleşimi Onayla</button>
+              </div>
+            </div>
+
+            <div id="assignArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Eşleştirme Modülü</span>
+                <div id="assignList" class="assign-list"></div>
+              </div>
+              <div class="sequence-buttons">
+                <button id="assignReset" class="secondary-button">Sıfırla</button>
+                <button id="assignSubmit" class="primary-button">Eşleştirmeyi Onayla</button>
+              </div>
+            </div>
+
+            <div id="multiArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Çoklu Seçim</span>
+                <p id="multiReadout" class="section-meta">Doğru olan tüm kartları seç.</p>
+              </div>
+              <div id="multiList" class="multi-list"></div>
+              <div class="sequence-buttons">
+                <button id="multiReset" class="secondary-button">Sıfırla</button>
+                <button id="multiSubmit" class="primary-button">Seçimleri Onayla</button>
+              </div>
+            </div>
+
+            <div id="compareArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Karşılaştırma Panosu</span>
+                <p id="compareReadout" class="section-meta">Her satır için doğru ilişkiyi seç.</p>
+              </div>
+              <div id="compareList" class="compare-list"></div>
+              <div class="sequence-buttons">
+                <button id="compareReset" class="secondary-button">Sıfırla</button>
+                <button id="compareSubmit" class="primary-button">Karşılaştırmayı Onayla</button>
+              </div>
+            </div>
+
+            <div id="stepperArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Değer Ayar Paneli</span>
+                <p id="stepperReadout" class="section-meta">Her satır için doğru değeri ayarla.</p>
+              </div>
+              <div id="stepperList" class="stepper-list"></div>
+              <div class="sequence-buttons">
+                <button id="stepperReset" class="secondary-button">Sıfırla</button>
+                <button id="stepperSubmit" class="primary-button">Değerleri Onayla</button>
+              </div>
+            </div>
+
+            <div id="tablePickArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Tablo Seçimi</span>
+                <p id="tablePickReadout" class="section-meta">Tablodaki doğru satırı seç.</p>
+              </div>
+              <div id="tablePickBoard" class="table-pick-board"></div>
+              <div class="sequence-buttons">
+                <button id="tablePickSubmit" class="primary-button">Satırı Onayla</button>
+              </div>
+            </div>
+
+            <div id="matrixArea" class="sequence-area hidden">
+              <div>
+                <span class="section-label">Eşleme Matrisi</span>
+                <p id="matrixReadout" class="section-meta">Her satırı doğru sütunla işaretle.</p>
+              </div>
+              <div id="matrixBoard" class="matrix-board"></div>
+              <div class="sequence-buttons">
+                <button id="matrixReset" class="secondary-button">Sıfırla</button>
+                <button id="matrixSubmit" class="primary-button">Matrisi Onayla</button>
+              </div>
+            </div>
+
+            <div id="verdictBox" class="verdict-box hidden">
+              <strong id="verdictTitle">Sistem yorumu</strong>
+              <p id="verdictText"></p>
+            </div>
+
+            <div class="terminal-aux">
+              <button id="ignoreButton" class="secondary-button danger-button">Krizi Görmezden Gel</button>
+            </div>
+          </section>
+        </section>
+
+        <aside class="dock-panel">
+          <div class="section-header">
+            <span class="section-label">Yan Sistemler</span>
+            <span class="section-meta">erişim panelleri</span>
+          </div>
+
+          <button id="openScanner" class="dock-button">Atom Tarama Konsolu</button>
+          <button id="openCooling" class="dock-button utility-button">Soğutma Kontrolü</button>
+          <button id="openNotes" class="dock-button">Operatör Notları</button>
+
+          <div class="utility-group">
+            <button id="audioToggle" class="dock-button utility-button">Ses <span id="audioStatus">Hazır</span></button>
+            <button id="musicToggle" class="dock-button utility-button">Ambiyans <span id="musicStatus">Açık</span></button>
+          </div>
+
+          <div class="utility-group">
+            <button id="coolantButton" class="dock-button utility-button">Acil Soğutma <span id="coolantCount">2</span></button>
+            <button id="intelButton" class="dock-button utility-button">Derin Tanı <span id="intelCount">2</span></button>
+            <button id="shieldButton" class="dock-button utility-button">Yedek Sigorta <span id="shieldCount">1</span></button>
+            <button id="stasisButton" class="dock-button utility-button">Alan Sabitleme <span id="stasisCount">1</span></button>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <section id="startOverlay" class="overlay visible intro-overlay">
+      <div class="overlay-panel intro-panel">
+        <div class="intro-main">
+          <span class="panel-tag">OPERASYON BRİFİNGİ</span>
+          <h2>Atomik Alarm // Çekirdek Simülasyonu</h2>
+          <p class="intro-lead">
+            Kontrol odası devredildi. Gelen paketler eksik, gürültülü ya da çelişkili veri
+            içerebilir. Doğru müdahale kadar zaman, sıcaklık ve stabilite takibi de kritiktir.
+          </p>
+          <div class="intro-grid">
+            <article class="intro-card">
+              <strong>Kayıt Okuma</strong>
+              <p>Paket önce başlık, canlı veri ve istek satırıyla okunur. İlk karar çoğu zaman burada netleşir.</p>
+            </article>
+            <article class="intro-card">
+              <strong>Tarama Prosedürü</strong>
+              <p>Tür ya da kök taraması eksik veriyi kapatır; her tarama ek süre ve sıcaklık yükü üretir.</p>
+            </article>
+            <article class="intro-card">
+              <strong>Kesinti Kaynakları</strong>
+              <p>Parazit, kilit ve kritik paketler ana hattı böler. Karar gecikirse stabilite hızla düşer.</p>
+            </article>
+            <article class="intro-card">
+              <strong>Kapanış Prosedürü</strong>
+              <p>Çalışma sonunda modüller doğru sırayla kapatılmazsa çekirdek temiz çıkış vermez.</p>
+            </article>
+          </div>
+
+          <article class="intro-flow">
+            <div class="intro-flow-head">
+              <span class="section-label">Çalışma Dizisi</span>
+              <span class="section-meta">kayıt -> doğrulama -> müdahale -> denge</span>
+            </div>
+            <div class="intro-flow-grid">
+              <div class="intro-flow-step">
+                <b>01</b>
+                <strong>Oku</strong>
+              </div>
+              <div class="intro-flow-step">
+                <b>02</b>
+                <strong>Doğrula</strong>
+              </div>
+              <div class="intro-flow-step">
+                <b>03</b>
+                <strong>Müdahale</strong>
+              </div>
+              <div class="intro-flow-step">
+                <b>04</b>
+                <strong>Dengele</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <aside class="intro-side">
+          <article class="intro-stat intro-history">
+            <span>Operatör Geçmişi</span>
+            <strong id="introHistoryTitle">Henüz operasyon kaydı yok</strong>
+            <div class="intro-history-grid">
+              <div class="intro-history-item">
+                <span>Toplam Tur</span>
+                <b id="introRunsAvg">0</b>
+              </div>
+              <div class="intro-history-item">
+                <span>Kurtarma</span>
+                <b id="introWinRateAvg">%0</b>
+              </div>
+              <div class="intro-history-item">
+                <span>Ort. Süre</span>
+                <b id="introDurationAvg">--</b>
+              </div>
+              <div class="intro-history-item">
+                <span>Ort. Hata</span>
+                <b id="introMistakeAvg">--</b>
+              </div>
+              <div class="intro-history-item">
+                <span>Ort. Tarama</span>
+                <b id="introScanAvg">--</b>
+              </div>
+              <div class="intro-history-item">
+                <span>En İyi Süre</span>
+                <b id="introBestTime">--</b>
+              </div>
+            </div>
+          </article>
+          <div class="intro-footer">
+            <div class="intro-meta">
+              <div class="intro-stack">
+                <article class="intro-stat">
+                  <span id="introCrisisLabel">Tur Yapısı</span>
+                  <strong id="introCrisisCount">8 kriz + 1 kapanış</strong>
+                </article>
+                <article class="intro-stat">
+                  <span id="introAlertLabel">Alarm Yoğunluğu</span>
+                  <strong id="introAlertRange">1-3 kritik paket</strong>
+                </article>
+                <article class="intro-stat">
+                  <span id="introScanLabel">Tarama Penceresi</span>
+                  <strong id="introScanRange">3-10 saniye</strong>
+                </article>
+              </div>
+
+              <div class="difficulty-picker">
+                <span class="section-label">Zorluk Seçimi</span>
+                <div class="difficulty-grid">
+                  <button type="button" class="difficulty-card" data-difficulty="egitim">
+                    <strong>Eğitim</strong>
+                  </button>
+                  <button type="button" class="difficulty-card" data-difficulty="kolay">
+                    <strong>Kolay</strong>
+                  </button>
+                  <button type="button" class="difficulty-card active" data-difficulty="standart">
+                    <strong>Standart</strong>
+                  </button>
+                  <button type="button" class="difficulty-card" data-difficulty="kritik">
+                    <strong>Kritik</strong>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="intro-actions">
+              <button id="startButton" class="primary-button intro-start">
+                <span class="intro-start-copy">
+                  <span id="startButtonKicker" class="intro-start-kicker">Çekirdek Devri</span>
+                  <span id="startButtonLabel" class="intro-start-label">Çalışmayı Başlat</span>
+                </span>
+                <span class="intro-start-arrow" aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="tutorialGuide" class="tutorial-guide hidden" aria-live="polite">
+      <div class="tutorial-guide-curtain" aria-hidden="true"></div>
+      <article class="tutorial-guide-card">
+        <div class="tutorial-guide-topline">
+          <span id="tutorialGuideTag" class="panel-tag">EĞİTİM</span>
+          <span id="tutorialGuideStep" class="section-meta">Adım 1 / 1</span>
+        </div>
+        <h3 id="tutorialGuideTitle">Odak noktası</h3>
+        <p id="tutorialGuideText">Bu alan eğitim kartı için ayrıldı.</p>
+        <p id="tutorialGuideHint" class="tutorial-guide-hint">Bu adımı yapınca eğitim otomatik ilerler.</p>
+        <div class="tutorial-guide-actions">
+          <button id="tutorialGuideNext" class="primary-button">Devam</button>
+        </div>
+      </article>
+    </section>
+
+    <section id="bootOverlay" class="overlay">
+      <div id="bootPanel" class="overlay-panel boot-panel" data-mode="boot">
+        <span id="bootTag" class="panel-tag">ÇEKİRDEK BAŞLATMA AKIŞI</span>
+        <h2 id="bootTitle">Simülasyon hazırlanıyor</h2>
+        <p id="bootStatus" class="boot-status">Başlatma kuyruğu oluşturuluyor...</p>
+        <div id="bootFeed" class="terminal-feed boot-feed"></div>
+        <div class="boot-progress">
+          <div id="bootProgressFill" class="boot-progress-fill"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="scannerOverlay" class="overlay">
+      <div class="overlay-panel wide notes-shell">
+        <div class="overlay-topline">
+          <div>
+            <span class="panel-tag">ATOM TARAMA KONSOLU</span>
+            <h2>Ham veri çek</h2>
+          </div>
+          <button id="closeScanner" class="secondary-button">Kapat</button>
+        </div>
+
+        <div class="scan-modes">
+          <button data-mode="single" class="mode-button active">Tek Atom</button>
+          <button data-mode="root" class="mode-button">Kök Tarama</button>
+        </div>
+
+        <div class="scan-grid">
+          <div class="field-group">
+            <label class="field">
+              <span id="scanTargetLabel">Atom</span>
+              <select id="scanAtomA"></select>
+            </label>
+            <label id="scanChargeField" class="field hidden">
+              <span>Yük</span>
+              <select id="scanCharge">
+                <option value="-2">-2</option>
+                <option value="-1">-1</option>
+                <option value="1">+1</option>
+                <option value="2">+2</option>
+                <option value="3">+3</option>
+              </select>
+            </label>
+            <button id="scanButton" class="primary-button scan-launch">Tarama Başlat</button>
+          </div>
+
+          <div class="scan-console">
+            <div class="section-header">
+              <span class="section-label">Tarama Çıkışı</span>
+              <span id="scanMeta" class="section-meta">boşta</span>
+            </div>
+            <div id="scanOutput" class="terminal-feed"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="coolingOverlay" class="overlay">
+      <div class="overlay-panel cooling-panel">
+        <div class="overlay-topline">
+          <div>
+            <span class="panel-tag danger">ÇEKİRDEK ISI KONTROLÜ</span>
+            <h2>Manuel soğutma devresi</h2>
+          </div>
+          <button id="closeCooling" class="secondary-button">Kapat</button>
+        </div>
+
+        <div class="cooling-layout">
+            <article class="mini-card cooling-card">
+              <strong>Anlık Isı</strong>
+              <p id="coolingText">Çekirdek ısı yükü güvenli bandın altında. Şimdilik izleme yeterli.</p>
+            <div class="cooling-meter">
+              <div id="coolingSafeBand" class="cooling-safe-band"></div>
+              <div id="coolingFill" class="cooling-fill"></div>
+              <div id="coolingNeedle" class="cooling-needle"></div>
+            </div>
+            <div class="cooling-scale">
+              <span>273 K</span>
+              <span id="coolingSafeLabel">Güvenli bant 301 K - 315 K</span>
+              <span>373 K</span>
+            </div>
+            <div id="coolingStatus" class="cooling-status">İzleme</div>
+          </article>
+
+          <article class="mini-card cooling-card">
+            <strong>Tahliye Prosedürü</strong>
+            <p>
+              Vanayı basılı tut. Panel açıkken süre işlemeye devam eder; fazla beklersen ana krizden koparsın.
+            </p>
+            <button id="coolingHold" class="primary-button cooling-hold">Tahliyeyi Basılı Tut</button>
+            <p class="cooling-tip">
+              Isı 343 K üstüne çıktığında baskı artar. 361 K üstünde gövde stabilitesi de erimeye başlar.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="notesOverlay" class="overlay">
+      <div class="overlay-panel wide">
+        <div class="overlay-topline">
+          <div>
+            <span class="panel-tag">OPERATÖR NOTLARI</span>
+            <h2 id="notesTitle">Saha defteri</h2>
+          </div>
+          <button id="closeNotes" class="secondary-button">Kapat</button>
+        </div>
+
+        <div class="notes-layout">
+          <aside id="notesSidebar" class="notes-sidebar"></aside>
+          <section class="notes-main">
+            <div id="notesPaper" class="notes-paper"></div>
+            <div class="notes-footer">
+              <button id="prevNote" class="secondary-button">Önceki</button>
+              <span id="notesPageLabel" class="notes-page-label">1 / 1</span>
+              <button id="nextNote" class="secondary-button">Sonraki</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section id="lockOverlay" class="overlay">
+      <div class="overlay-panel lock-panel">
+        <span class="panel-tag danger">CANLI OLAY // EKRAN KİLİDİ</span>
+        <h2 id="lockTitle">Panel kilitlendi</h2>
+        <p id="lockText">
+          Glitch katmanı ana ekranı kısa süreli kilitledi. Krize dönmek için çekirdek kodunu gir.
+        </p>
+        <div class="mini-card lock-card">
+          <strong>İpucu</strong>
+          <p id="lockHint"></p>
+        </div>
+        <label class="terminal-input-wrap lock-input-wrap" for="lockInput">
+          <span class="prompt-label">unlock</span>
+          <div class="lock-entry">
+            <input
+              id="lockInput"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="çekirdek kodu"
+            />
+          </div>
+        </label>
+        <div class="sequence-buttons">
+          <button id="lockSubmit" class="primary-button">Kilidi Aç</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="noiseOverlay" class="overlay">
+      <div id="noisePanel" class="overlay-panel noise-panel">
+        <span id="noiseTag" class="panel-tag danger">CANLI OLAY // PARAZİT DALGASI</span>
+        <h2 id="noiseTitle">Sinyal Kirlenmesi</h2>
+        <p id="noiseText">
+          Ekran akışı parazit aldı. Ana paneli yeniden netlemek için frekans temizliği yapman gerekiyor.
+        </p>
+        <div class="noise-panel-shell">
+          <div class="noise-visual" aria-hidden="true"></div>
+          <div class="noise-progress">
+            <div id="noiseSteps" class="noise-steps"></div>
+            <span id="noiseReadout" class="section-meta">İmleci güvenli banda getirip kilitle.</span>
+            <div id="noiseTuner" class="noise-tuner">
+              <div id="noiseWindow" class="noise-window"></div>
+              <div id="noiseCursor" class="noise-cursor"></div>
+            </div>
+            <div id="noiseMatchArea" class="noise-match hidden">
+              <div id="noiseMatchLeft" class="noise-match-column"></div>
+              <div id="noiseMatchRight" class="noise-match-column"></div>
+            </div>
+          </div>
+        </div>
+        <div class="sequence-buttons">
+          <button id="noiseButton" class="primary-button">Frekansı Kilitle</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="outcomeOverlay" class="overlay">
+      <div id="outcomePanel" class="overlay-panel outcome-panel">
+        <div class="outcome-scroll">
+          <span id="outcomeTag" class="panel-tag danger">OPERASYON SONUCU</span>
+          <div class="outcome-crest" aria-hidden="true"></div>
+          <h2 id="outcomeTitle">Sonuç</h2>
+          <p id="outcomeText"></p>
+          <div id="outcomeDetails" class="outcome-details"></div>
+        </div>
+        <div class="outcome-actions">
+          <button id="menuButton" class="secondary-button">Ana Menü</button>
+          <button id="restartButton" class="primary-button">Yeni Çalışma Başlat</button>
+        </div>
+      </div>
+    </section>
+
+    <script src="script.js"></script>
+  </body>
+</html>
